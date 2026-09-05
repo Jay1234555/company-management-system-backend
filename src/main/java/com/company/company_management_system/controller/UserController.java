@@ -20,7 +20,7 @@ import com.company.company_management_system.service.UserService;
 @RequestMapping("/api/users")
 @CrossOrigin(origins = {
 	    "http://localhost:3000",
-	    "sparkling-communication-production-0a7a.up.railway.app"
+	    "https://sparkling-communication-production-0a7a.up.railway.app"
 	})
 public class UserController {
 

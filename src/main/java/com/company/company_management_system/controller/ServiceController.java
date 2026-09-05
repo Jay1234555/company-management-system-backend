@@ -17,7 +17,11 @@ import com.company.company_management_system.service.ServiceService;
 
 @RestController
 @RequestMapping("/api/services")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {
+	    "http://localhost:3000",
+"sparkling-communication-production-0a7a.up.railway.app"
+	    })
+
 public class ServiceController {
 
     private final ServiceService serviceService;
