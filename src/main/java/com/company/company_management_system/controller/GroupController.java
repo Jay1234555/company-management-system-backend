@@ -18,45 +18,40 @@ import com.company.company_management_system.service.GroupService;
 
 @RestController
 @RequestMapping("/api/groups")
-@CrossOrigin
+@CrossOrigin(origins = {
+	    "http://localhost:3000",
+	    "https://sparkling-communication-production-0a7a.up.railway.app"
+	})
 public class GroupController {
+	
 
     @Autowired
     private GroupService groupService;
 
-    // Add Group
     @PostMapping
     public Group addGroup(@RequestBody Group group) {
         return groupService.addGroup(group);
     }
 
-    // Get All Groups
     @GetMapping
     public List<Group> getAllGroups() {
         return groupService.getAllGroups();
     }
 
-    // Get Group By ID
     @GetMapping("/{id}")
     public Group getGroupById(@PathVariable Long id) {
         return groupService.getGroupById(id);
     }
 
-    // Update Group
     @PutMapping("/{id}")
-    public Group updateGroup(
-            @PathVariable Long id,
-            @RequestBody Group group) {
-
+    public Group updateGroup(@PathVariable Long id,
+                             @RequestBody Group group) {
         return groupService.updateGroup(id, group);
     }
 
-    // Delete Group
     @DeleteMapping("/{id}")
     public String deleteGroup(@PathVariable Long id) {
-
         groupService.deleteGroup(id);
-
         return "Group deleted successfully";
     }
 }
