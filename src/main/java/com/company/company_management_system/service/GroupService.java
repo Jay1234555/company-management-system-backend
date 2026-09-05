@@ -16,37 +16,82 @@ public class GroupService {
 
     // Create Group
     public Group addGroup(Group group) {
+
+        String name = group.getName() == null
+                ? ""
+                : group.getName().trim();
+
+        // Empty name validation
+        if (name.isEmpty()) {
+            throw new IllegalArgumentException("Group name cannot be empty");
+        }
+
+        // Duplicate name validation
+        if (groupRepository.existsByNameIgnoreCaseAndIsDeletedFalse(name)) {
+            throw new IllegalArgumentException("Group name already exists");
+        }
+
+        group.setName(name);
+
+        // New group is active
+        group.setDeleted(false);
+
         return groupRepository.save(group);
     }
 
-    // Get All Groups
+    // Get All Active Groups
     public List<Group> getAllGroups() {
-        return groupRepository.findAll();
+
+        return groupRepository.findByIsDeletedFalse();
     }
 
     // Get Group By ID
     public Group getGroupById(Long id) {
-        return groupRepository.findById(id).orElse(null);
+
+        return groupRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
     }
 
     // Update Group
     public Group updateGroup(Long id, Group group) {
 
-        Group existingGroup = groupRepository.findById(id).orElse(null);
+        String name = group.getName() == null
+                ? ""
+                : group.getName().trim();
 
-        if (existingGroup != null) {
-
-            existingGroup.setName(group.getName());
-            existingGroup.setDescription(group.getDescription());
-
-            return groupRepository.save(existingGroup);
+        // Empty name validation
+        if (name.isEmpty()) {
+            throw new IllegalArgumentException("Group name cannot be empty");
         }
 
-        return null;
+        // Find active group
+        Group existingGroup = groupRepository
+                .findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        // Duplicate name validation
+        if (groupRepository
+                .existsByNameIgnoreCaseAndIsDeletedFalseAndIdNot(name, id)) {
+
+            throw new IllegalArgumentException("Group name already exists");
+        }
+
+        existingGroup.setName(name);
+        existingGroup.setDescription(group.getDescription());
+
+        return groupRepository.save(existingGroup);
     }
 
-    // Delete Group
+    // Soft Delete Group
     public void deleteGroup(Long id) {
-        groupRepository.deleteById(id);
+
+        Group existingGroup = groupRepository
+                .findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        // Soft delete
+        existingGroup.setDeleted(true);
+
+        groupRepository.save(existingGroup);
     }
 }

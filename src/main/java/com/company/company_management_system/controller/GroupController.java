@@ -3,6 +3,8 @@ package com.company.company_management_system.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,39 +21,101 @@ import com.company.company_management_system.service.GroupService;
 @RestController
 @RequestMapping("/api/groups")
 @CrossOrigin(origins = {
-	    "http://localhost:3000",
-	    "https://sparkling-communication-production-0a7a.up.railway.app"
-	})
+        "http://localhost:3000",
+        "https://sparkling-communication-production-0a7a.up.railway.app"
+})
 public class GroupController {
-	
 
     @Autowired
     private GroupService groupService;
 
+    // Create Group
     @PostMapping
-    public Group addGroup(@RequestBody Group group) {
-        return groupService.addGroup(group);
+    public ResponseEntity<?> addGroup(@RequestBody Group group) {
+
+        try {
+
+            Group savedGroup = groupService.addGroup(group);
+
+            return new ResponseEntity<>(savedGroup, HttpStatus.CREATED);
+
+        } catch (IllegalArgumentException e) {
+
+            return new ResponseEntity<>(
+                    e.getMessage(),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
     }
 
+    // Get All Active Groups
     @GetMapping
-    public List<Group> getAllGroups() {
-        return groupService.getAllGroups();
+    public ResponseEntity<List<Group>> getAllGroups() {
+
+        return ResponseEntity.ok(groupService.getAllGroups());
     }
 
+    // Get Group By ID
     @GetMapping("/{id}")
-    public Group getGroupById(@PathVariable Long id) {
-        return groupService.getGroupById(id);
+    public ResponseEntity<?> getGroupById(@PathVariable Long id) {
+
+        try {
+
+            return ResponseEntity.ok(groupService.getGroupById(id));
+
+        } catch (RuntimeException e) {
+
+            return new ResponseEntity<>(
+                    e.getMessage(),
+                    HttpStatus.NOT_FOUND
+            );
+        }
     }
 
+    // Update Group
     @PutMapping("/{id}")
-    public Group updateGroup(@PathVariable Long id,
-                             @RequestBody Group group) {
-        return groupService.updateGroup(id, group);
+    public ResponseEntity<?> updateGroup(
+            @PathVariable Long id,
+            @RequestBody Group group) {
+
+        try {
+
+            Group updatedGroup = groupService.updateGroup(id, group);
+
+            return ResponseEntity.ok(updatedGroup);
+
+        } catch (IllegalArgumentException e) {
+
+            return new ResponseEntity<>(
+                    e.getMessage(),
+                    HttpStatus.BAD_REQUEST
+            );
+
+        } catch (RuntimeException e) {
+
+            return new ResponseEntity<>(
+                    e.getMessage(),
+                    HttpStatus.NOT_FOUND
+            );
+        }
     }
 
+    // Soft Delete Group
     @DeleteMapping("/{id}")
-    public String deleteGroup(@PathVariable Long id) {
-        groupService.deleteGroup(id);
-        return "Group deleted successfully";
+    public ResponseEntity<?> deleteGroup(@PathVariable Long id) {
+
+        try {
+
+            groupService.deleteGroup(id);
+
+            return ResponseEntity.ok("Group deleted successfully");
+
+        } catch (RuntimeException e) {
+
+            return new ResponseEntity<>(
+                    e.getMessage(),
+                    HttpStatus.NOT_FOUND
+            );
+        }
     }
 }
