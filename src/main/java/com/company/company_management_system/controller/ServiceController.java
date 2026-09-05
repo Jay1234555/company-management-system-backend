@@ -10,59 +10,62 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.company.company_management_system.entity.CompanyService;
 import com.company.company_management_system.service.ServiceService;
 
+
 @RestController
 @RequestMapping("/api/services")
-@CrossOrigin(origins = {
-	    "http://localhost:3000",
-"sparkling-communication-production-0a7a.up.railway.app"
-	    })
-
+@CrossOrigin(
+    origins = {
+        "http://localhost:3000",
+        "https://sparkling-communication-production-0a7a.up.railway.app"
+    },
+    allowedHeaders = "*",
+    methods = {
+        RequestMethod.GET,
+        RequestMethod.POST,
+        RequestMethod.PUT,
+        RequestMethod.DELETE,
+        RequestMethod.OPTIONS
+    }
+)
 public class ServiceController {
 
-    private final ServiceService serviceService;
+    private final ServiceService service;
 
-    public ServiceController(ServiceService serviceService) {
-        this.serviceService = serviceService;
+    public ServiceController(ServiceService service) {
+        this.service = service;
     }
 
-    // GET all services
     @GetMapping
     public List<CompanyService> getAllServices() {
-        return serviceService.getAllServices();
+        return service.getAllServices();
     }
 
-    // GET service by ID
     @GetMapping("/{id}")
-    public CompanyService getService(@PathVariable Long id) {
-        return serviceService.getServiceById(id);
+    public CompanyService getServiceById(@PathVariable Long id) {
+        return service.getServiceById(id);
     }
 
-    // CREATE service
     @PostMapping
-    public CompanyService createService(@RequestBody CompanyService service) {
-        return serviceService.createService(service);
+    public CompanyService createService(@RequestBody CompanyService companyService) {
+        return service.createService(companyService);
     }
 
-    // UPDATE service
     @PutMapping("/{id}")
     public CompanyService updateService(
             @PathVariable Long id,
-            @RequestBody CompanyService service) {
+            @RequestBody CompanyService companyService) {
 
-        return serviceService.updateService(id, service);
+        return service.updateService(id, companyService);
     }
 
-    // DELETE service
     @DeleteMapping("/{id}")
-    public String deleteService(@PathVariable Long id) {
-
-        serviceService.deleteService(id);
-
-        return "Service deleted successfully";
+    public void deleteService(@PathVariable Long id) {
+        service.deleteService(id);
     }
 }
