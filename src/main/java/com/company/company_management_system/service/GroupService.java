@@ -42,9 +42,12 @@ public class GroupService {
     // Get All Active Groups
     public List<Group> getAllGroups() {
 
+        List<Group> groups = groupRepository.findAll();
+
+        System.out.println("ALL GROUPS IN DATABASE: " + groups);
+
         return groupRepository.findByIsDeletedFalse();
     }
-
     // Get Group By ID
     public Group getGroupById(Long id) {
 
@@ -93,5 +96,6 @@ public class GroupService {
         existingGroup.setDeleted(true);
 
         groupRepository.save(existingGroup);
+        
     }
 }
