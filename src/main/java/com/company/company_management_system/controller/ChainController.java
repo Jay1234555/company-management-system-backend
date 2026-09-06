@@ -2,68 +2,83 @@ package com.company.company_management_system.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.company.company_management_system.entity.Chain;
 import com.company.company_management_system.service.ChainService;
 
 @RestController
 @RequestMapping("/api/chains")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = {
+        "http://localhost:3000",
+        "https://sparkling-communication-production-0a7a.up.railway.app"
+})
 public class ChainController {
 
-    private final ChainService chainService;
+    @Autowired
+    private ChainService chainService;
 
-    public ChainController(ChainService chainService) {
-        this.chainService = chainService;
-    }
-
-    // Get all active chains
+    // Get All Active Chains
     @GetMapping
     public ResponseEntity<List<Chain>> getAllChains() {
 
-        return ResponseEntity.ok(
-                chainService.getAllChains()
-        );
+        return ResponseEntity.ok(chainService.getAllChains());
     }
 
-    // Get Chain by ID
+    // Get Chain By ID
     @GetMapping("/{id}")
-    public ResponseEntity<?> getChainById(
-            @PathVariable Long id) {
+    public ResponseEntity<?> getChainById(@PathVariable Long id) {
 
         try {
 
-            return ResponseEntity.ok(
-                    chainService.getChainById(id)
+            return ResponseEntity.ok(chainService.getChainById(id));
+
+        } catch (RuntimeException e) {
+
+            return new ResponseEntity<>(
+                    e.getMessage(),
+                    HttpStatus.NOT_FOUND
+            );
+        }
+    }
+
+    // Create Chain
+    @PostMapping
+    public ResponseEntity<?> addChain(@RequestBody Chain chain) {
+
+        try {
+
+            Chain savedChain = chainService.addChain(chain);
+
+            return new ResponseEntity<>(
+                    savedChain,
+                    HttpStatus.CREATED
+            );
+
+        } catch (IllegalArgumentException e) {
+
+            return new ResponseEntity<>(
+                    e.getMessage(),
+                    HttpStatus.BAD_REQUEST
             );
 
         } catch (RuntimeException e) {
 
-            return ResponseEntity
-                    .badRequest()
-                    .body(e.getMessage());
-        }
-    }
-
-    // Add Chain
-    @PostMapping
-    public ResponseEntity<?> addChain(
-            @RequestBody Chain chain) {
-
-        try {
-
-            Chain savedChain =
-                    chainService.addChain(chain);
-
-            return ResponseEntity.ok(savedChain);
-
-        } catch (RuntimeException e) {
-
-            return ResponseEntity
-                    .badRequest()
-                    .body(e.getMessage());
+            return new ResponseEntity<>(
+                    e.getMessage(),
+                    HttpStatus.BAD_REQUEST
+            );
         }
     }
 
@@ -80,35 +95,44 @@ public class ChainController {
 
             return ResponseEntity.ok(updatedChain);
 
+        } catch (IllegalArgumentException e) {
+
+            return new ResponseEntity<>(
+                    e.getMessage(),
+                    HttpStatus.BAD_REQUEST
+            );
+
         } catch (RuntimeException e) {
 
-            return ResponseEntity
-                    .badRequest()
-                    .body(e.getMessage());
+            return new ResponseEntity<>(
+                    e.getMessage(),
+                    HttpStatus.NOT_FOUND
+            );
         }
     }
 
     // Soft Delete Chain
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteChain(
-            @PathVariable Long id) {
+    public ResponseEntity<?> deleteChain(@PathVariable Long id) {
 
         try {
 
-            String message =
-                    chainService.deleteChain(id);
+            chainService.deleteChain(id);
 
-            return ResponseEntity.ok(message);
+            return ResponseEntity.ok(
+                    "Chain deleted successfully"
+            );
 
         } catch (RuntimeException e) {
 
-            return ResponseEntity
-                    .badRequest()
-                    .body(e.getMessage());
+            return new ResponseEntity<>(
+                    e.getMessage(),
+                    HttpStatus.BAD_REQUEST
+            );
         }
     }
 
-    // Filter Chain by Group
+    // Filter Chains By Group
     @GetMapping("/group/{groupId}")
     public ResponseEntity<?> getChainsByGroup(
             @PathVariable Long groupId) {
@@ -121,9 +145,10 @@ public class ChainController {
 
         } catch (RuntimeException e) {
 
-            return ResponseEntity
-                    .badRequest()
-                    .body(e.getMessage());
+            return new ResponseEntity<>(
+                    e.getMessage(),
+                    HttpStatus.NOT_FOUND
+            );
         }
     }
 }
