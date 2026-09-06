@@ -8,8 +8,8 @@ SELECT * FROM customer_groups;
 
 SELECT name, is_deleted
 FROM customer_groups;
-
-
+CREATE DATABASE railway;
+use railway;
 INSERT INTO users (name, email, password, role)
 VALUES ('Admin', 'admin@gmail.com', 'admin123', 'ADMIN');
 

@@ -22,60 +22,85 @@ public class ChainService {
         this.groupRepository = groupRepository;
     }
 
-    // Get all active chains
+    // Get All Active Chains
     public List<Chain> getAllChains() {
+
         return chainRepository.findByIsActiveTrue();
     }
 
-    // Get chain by ID
+    // Get Chain By ID
     public Chain getChainById(Long id) {
 
         return chainRepository.findByChainIdAndIsActiveTrue(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Chain not found with ID: " + id));
+                        new RuntimeException(
+                                "Chain not found with ID: " + id
+                        )
+                );
     }
 
-    // Add Chain
+    // Create Chain
     public Chain addChain(Chain chain) {
 
-        // Company name validation
+        // Validate Company Name
         if (chain.getCompanyName() == null ||
                 chain.getCompanyName().trim().isEmpty()) {
 
-            throw new RuntimeException("Company name is required");
+            throw new IllegalArgumentException(
+                    "Company name is required"
+            );
         }
 
-        // GSTN validation
+        // Validate GSTN
         if (chain.getGstnNo() == null ||
                 chain.getGstnNo().trim().isEmpty()) {
 
-            throw new RuntimeException("GSTN number is required");
+            throw new IllegalArgumentException(
+                    "GSTN number is required"
+            );
         }
 
-        // Group validation
+        // Validate GSTN length
+        if (chain.getGstnNo().trim().length() != 15) {
+
+            throw new IllegalArgumentException(
+                    "GSTN number must be 15 characters"
+            );
+        }
+
+        // Validate Group
         if (chain.getGroup() == null ||
                 chain.getGroup().getId() == null) {
 
-            throw new RuntimeException("Group is required");
+            throw new IllegalArgumentException(
+                    "Group is required"
+            );
         }
 
-        // Check GSTN duplicate
-        if (chainRepository.existsByGstnNo(chain.getGstnNo())) {
+        // Check duplicate GSTN
+        if (chainRepository.existsByGstnNo(
+                chain.getGstnNo().trim())) {
 
-            throw new RuntimeException("GSTN number already exists");
+            throw new IllegalArgumentException(
+                    "GSTN number already exists"
+            );
         }
 
-        // Get existing active group
+        // Get existing active Group
         Long groupId = chain.getGroup().getId();
 
-        Group group = groupRepository.findByIdAndIsDeletedFalse(groupId)
+        Group group = groupRepository
+                .findByIdAndIsDeletedFalse(groupId)
                 .orElseThrow(() ->
-                        new RuntimeException("Active group not found"));
+                        new RuntimeException(
+                                "Active group not found"
+                        )
+                );
 
-        // Set actual Group entity
+        // Set actual Group
         chain.setGroup(group);
 
-        // New chain is active
+        // Set active
         chain.setActive(true);
 
         return chainRepository.save(chain);
@@ -84,47 +109,76 @@ public class ChainService {
     // Update Chain
     public Chain updateChain(Long id, Chain updatedChain) {
 
+        // Find existing active Chain
         Chain existingChain = getChainById(id);
 
-        // Company name validation
+        // Validate Company Name
         if (updatedChain.getCompanyName() == null ||
                 updatedChain.getCompanyName().trim().isEmpty()) {
 
-            throw new RuntimeException("Company name is required");
+            throw new IllegalArgumentException(
+                    "Company name is required"
+            );
         }
 
-        // GSTN validation
+        // Validate GSTN
         if (updatedChain.getGstnNo() == null ||
                 updatedChain.getGstnNo().trim().isEmpty()) {
 
-            throw new RuntimeException("GSTN number is required");
+            throw new IllegalArgumentException(
+                    "GSTN number is required"
+            );
         }
 
-        // Group validation
+        // Validate GSTN length
+        if (updatedChain.getGstnNo().trim().length() != 15) {
+
+            throw new IllegalArgumentException(
+                    "GSTN number must be 15 characters"
+            );
+        }
+
+        // Validate Group
         if (updatedChain.getGroup() == null ||
                 updatedChain.getGroup().getId() == null) {
 
-            throw new RuntimeException("Group is required");
+            throw new IllegalArgumentException(
+                    "Group is required"
+            );
         }
 
-        // Check duplicate GSTN only if GSTN changed
+        String newGstn =
+                updatedChain.getGstnNo().trim();
+
+        // Check duplicate GSTN only when GSTN changed
         if (!existingChain.getGstnNo()
-                .equalsIgnoreCase(updatedChain.getGstnNo())
-                && chainRepository.existsByGstnNo(updatedChain.getGstnNo())) {
+                .equalsIgnoreCase(newGstn)
+                && chainRepository.existsByGstnNo(newGstn)) {
 
-            throw new RuntimeException("GSTN number already exists");
+            throw new IllegalArgumentException(
+                    "GSTN number already exists"
+            );
         }
 
-        // Get active group
-        Long groupId = updatedChain.getGroup().getId();
+        // Get active Group
+        Long groupId =
+                updatedChain.getGroup().getId();
 
-        Group group = groupRepository.findByIdAndIsDeletedFalse(groupId)
+        Group group = groupRepository
+                .findByIdAndIsDeletedFalse(groupId)
                 .orElseThrow(() ->
-                        new RuntimeException("Active group not found"));
+                        new RuntimeException(
+                                "Active group not found"
+                        )
+                );
 
-        // Update fields
-        existingChain.setCompanyName(updatedChain.getCompanyName());
-        existingChain.setGstnNo(updatedChain.getGstnNo());
+        // Update Chain
+        existingChain.setCompanyName(
+                updatedChain.getCompanyName().trim()
+        );
+
+        existingChain.setGstnNo(newGstn);
+
         existingChain.setGroup(group);
 
         return chainRepository.save(existingChain);
@@ -147,14 +201,19 @@ public class ChainService {
         return "Chain deleted successfully";
     }
 
-    // Filter chains by Group
+    // Filter Chains By Group
     public List<Chain> getChainsByGroup(Long groupId) {
 
+        // Only active Group can be selected
         Group group = groupRepository
                 .findByIdAndIsDeletedFalse(groupId)
                 .orElseThrow(() ->
-                        new RuntimeException("Active group not found"));
+                        new RuntimeException(
+                                "Active group not found"
+                        )
+                );
 
-        return chainRepository.findByGroupAndIsActiveTrue(group);
+        return chainRepository
+                .findByGroupAndIsActiveTrue(group);
     }
 }
