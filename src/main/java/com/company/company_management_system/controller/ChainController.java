@@ -36,13 +36,36 @@ public class ChainController {
         return ResponseEntity.ok(chainService.getAllChains());
     }
 
-    // Get Chain By ID
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getChainById(@PathVariable Long id) {
+    // Filter Chains By Group
+    @GetMapping("/group/{groupId}")
+    public ResponseEntity<?> getChainsByGroup(
+            @PathVariable Long groupId) {
 
         try {
 
-            return ResponseEntity.ok(chainService.getChainById(id));
+            return ResponseEntity.ok(
+                    chainService.getChainsByGroup(groupId)
+            );
+
+        } catch (RuntimeException e) {
+
+            return new ResponseEntity<>(
+                    e.getMessage(),
+                    HttpStatus.NOT_FOUND
+            );
+        }
+    }
+
+    // Get Chain By ID
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getChainById(
+            @PathVariable Long id) {
+
+        try {
+
+            return ResponseEntity.ok(
+                    chainService.getChainById(id)
+            );
 
         } catch (RuntimeException e) {
 
@@ -55,11 +78,13 @@ public class ChainController {
 
     // Create Chain
     @PostMapping
-    public ResponseEntity<?> addChain(@RequestBody Chain chain) {
+    public ResponseEntity<?> addChain(
+            @RequestBody Chain chain) {
 
         try {
 
-            Chain savedChain = chainService.addChain(chain);
+            Chain savedChain =
+                    chainService.addChain(chain);
 
             return new ResponseEntity<>(
                     savedChain,
@@ -113,7 +138,8 @@ public class ChainController {
 
     // Soft Delete Chain
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteChain(@PathVariable Long id) {
+    public ResponseEntity<?> deleteChain(
+            @PathVariable Long id) {
 
         try {
 
@@ -121,26 +147,6 @@ public class ChainController {
 
             return ResponseEntity.ok(
                     "Chain deleted successfully"
-            );
-
-        } catch (RuntimeException e) {
-
-            return new ResponseEntity<>(
-                    e.getMessage(),
-                    HttpStatus.BAD_REQUEST
-            );
-        }
-    }
-
-    // Filter Chains By Group
-    @GetMapping("/group/{groupId}")
-    public ResponseEntity<?> getChainsByGroup(
-            @PathVariable Long groupId) {
-
-        try {
-
-            return ResponseEntity.ok(
-                    chainService.getChainsByGroup(groupId)
             );
 
         } catch (RuntimeException e) {
